@@ -5,6 +5,8 @@ name = "pypi"
 
 [packages]
 pyfluids = "*"
+pandas = "*"
+pint = "*"
 
 [dev-packages]
 

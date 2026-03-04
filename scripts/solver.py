@@ -12,7 +12,7 @@ def solver():
     rho_liquid = liquid_phase.density
     h_liquid = liquid_phase.enthalpy
     
-    # Saturated steam (density, enthalpy)
+    # Saturated steam properties (density, enthalpy)
     rho_steam = steam_phase.density
     h_steam = steam_phase.enthalpy
     
