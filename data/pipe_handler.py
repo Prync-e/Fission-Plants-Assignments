@@ -4,6 +4,7 @@ import pint
 
 df = pd.read_csv("data/tubi_ansi.csv")
 ureg = pint.UnitRegistry()
+ROWS, _ = df.shape
 
 # Returning the inner diameter of the i-th row of the j-th col and its name
 def get_diameter(row: int, col = "STD") -> str|float:
