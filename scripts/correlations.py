@@ -1,6 +1,14 @@
 from pyfluids import Fluid
 
 def properties(fluid: Fluid) -> float|float|float:
+    """Produces properties of fluids from the pyFluid library
+
+    Args:
+        fluid (Fluid): 
+
+    Returns:
+        float|float|float: fluid density, specific enthalpy, dynamic viscosity
+    """
     return fluid.density, fluid.enthalpy, fluid.dynamic_viscosity
 
 def Reynolds(fluid: Fluid, vel: float, diam: float) -> float:
