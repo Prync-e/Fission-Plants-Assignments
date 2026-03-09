@@ -4,8 +4,17 @@ import data.pipe_handler as pp
 import data.assignment_data as dh
 import scripts.correlations as rr
 
+# Total localized losses
+def total_loc(rho_liquid: float, rho_steam: float, v_liquid: float, v_steam: float) -> float:
+    Dp_c = rr.localized_loss(dh.k_c, rho_liquid, v_liquid)              # Cooler (liquid)
+    Dp_h = rr.localized_loss(dh.k_h, rho_steam, v_steam)                # Heater (steam)
+    Dp_e_liquid = 2*rr.localized_loss(dh.k_e, rho_liquid, v_liquid)     # Pipe elbows (liquid)
+    Dp_e_steam = 2*rr.localized_loss(dh.k_e, rho_steam, v_steam)        # Pipe elbows (steam)
+    
+    return Dp_c + Dp_h + Dp_e_liquid + Dp_e_steam
+
 # Solution of point a
-def solve_point_a(liquid_phase: Fluid, steam_phase: Fluid):  
+def solve_point_a(liquid_phase: Fluid, steam_phase: Fluid) -> dict:  
     # Saturated water properties (density, enthalpy)
     rho_liquid, h_liquid, _ = rr.properties(liquid_phase)
     
@@ -15,6 +24,8 @@ def solve_point_a(liquid_phase: Fluid, steam_phase: Fluid):
     # Mass flow rate (knowing P and Delta h)
     mass_rate  = dh.Pth/(h_steam-h_liquid)
     
+    results = {}
+    
     # Compute H for each diameter of the pipe
     for i in range(pp.ROWS):
         Pipe_name, D_pipe = pp.get_diameter(i)
@@ -23,13 +34,8 @@ def solve_point_a(liquid_phase: Fluid, steam_phase: Fluid):
         v_liquid = mass_rate/rho_liquid*4/cs.pi/D_pipe**2
         v_steam = mass_rate/rho_steam*4/cs.pi/D_pipe**2
     
-        # pressure drop due to localized losses, the velocities were assigned by prof's slide
-        Dp_c = rr.localized_loss(dh.k_c, rho_liquid, v_liquid)              # Cooler (liquid)
-        Dp_h = rr.localized_loss(dh.k_h, rho_steam, v_steam)                # Heater (steam)
-        Dp_e_liquid = 2*rr.localized_loss(dh.k_e, rho_liquid, v_liquid)     # Pipe elbows (liquid)
-        Dp_e_steam = 2*rr.localized_loss(dh.k_e, rho_steam, v_steam)        # Pipe elbows (steam)
-        
-        loc_losses = Dp_c + Dp_h + Dp_e_liquid + Dp_e_steam
+        # pressure drop due to localized losses, the velocities were assigned by prof's slide    
+        loc_losses = total_loc(rho_liquid, rho_steam, v_liquid, v_steam)
     
         # Re
         Re_liquid = rr.Reynolds(liquid_phase, v_liquid, D_pipe)
@@ -46,10 +52,13 @@ def solve_point_a(liquid_phase: Fluid, steam_phase: Fluid):
         dist_losses = Dp_liquid + Dp_steam
                         
         h = (loc_losses+dist_losses)/(cs.g*(rho_liquid-rho_steam))
-        print(f"{Pipe_name}: h = {h:5f} m, v_s = {v_steam:5f}")
+        results[Pipe_name] = [D_pipe, h]
+        # print(f"{Pipe_name}: h = {h:5f} m, v_s = {v_steam:5f}")
+        
+    return results
         
 # Solution of point b       
-def solve_point_b(liquid_phase: Fluid, steam_phase: Fluid):
+def solve_point_b(liquid_phase: Fluid, steam_phase: Fluid) -> dict:
     # Saturated water properties (density, enthalpy)
     rho_liquid, h_liquid, _ = rr.properties(liquid_phase)
     
@@ -58,6 +67,8 @@ def solve_point_b(liquid_phase: Fluid, steam_phase: Fluid):
     
     # Mass flow rate (knowing P and Delta h)
     mass_rate  = dh.Pth/(h_steam-h_liquid)
+    
+    results = {}
     
     # Compute H for each diameter of the pipe
     for i in range(pp.ROWS):
@@ -68,12 +79,7 @@ def solve_point_b(liquid_phase: Fluid, steam_phase: Fluid):
         v_steam = mass_rate/rho_steam*4/cs.pi/D_pipe**2
     
         # pressure drop due to localized losses, the velocities were assigned by prof's slide
-        Dp_c = rr.localized_loss(dh.k_c, rho_liquid, v_liquid)              # Cooler (liquid)
-        Dp_h = rr.localized_loss(dh.k_h, rho_steam, v_steam)                # Heater (steam)
-        Dp_e_liquid = 2*rr.localized_loss(dh.k_e, rho_liquid, v_liquid)     # Pipe elbows (liquid)
-        Dp_e_steam = 2*rr.localized_loss(dh.k_e, rho_steam, v_steam)        # Pipe elbows (steam)
-        
-        loc_losses = Dp_c + Dp_h + Dp_e_liquid + Dp_e_steam
+        loc_losses = total_loc(rho_liquid, rho_steam, v_liquid, v_steam)
     
         # Re
         Re_liquid = rr.Reynolds(liquid_phase, v_liquid, D_pipe)
@@ -101,10 +107,13 @@ def solve_point_b(liquid_phase: Fluid, steam_phase: Fluid):
             cc += 1
             h = h_new
         
-        print(f"{Pipe_name}: h = {h:5f} m, iter = {cc}, err = {err:2e}")
+        results[Pipe_name] = [D_pipe, h]
+        # print(f"{Pipe_name}: h = {h:5f} m, iter = {cc}, err = {err:2e}")
+    
+    return results
 
 # Solution of point c       
-def solve_point_c(liquid_phase: Fluid, steam_phase: Fluid):
+def solve_point_c(liquid_phase: Fluid, steam_phase: Fluid) -> dict:
     # Saturated water properties (density, enthalpy)
     rho_liquid, h_liquid, _ = rr.properties(liquid_phase)
     
@@ -113,6 +122,8 @@ def solve_point_c(liquid_phase: Fluid, steam_phase: Fluid):
     
     # Mass flow rate (knowing P and Delta h)
     mass_rate  = dh.Pth/(h_steam-h_liquid)
+    
+    results = {}
     
     # Compute H for each diameter of the pipe
     for i in range(pp.ROWS):
@@ -123,12 +134,7 @@ def solve_point_c(liquid_phase: Fluid, steam_phase: Fluid):
         v_steam = mass_rate/rho_steam*4/cs.pi/D_pipe**2
     
         # pressure drop due to localized losses, the velocities were assigned by prof's slide
-        Dp_c = rr.localized_loss(dh.k_c, rho_liquid, v_liquid)              # Cooler (liquid)
-        Dp_h = rr.localized_loss(dh.k_h, rho_steam, v_steam)                # Heater (steam)
-        Dp_e_liquid = 2*rr.localized_loss(dh.k_e, rho_liquid, v_liquid)     # Pipe elbows (liquid)
-        Dp_e_steam = 2*rr.localized_loss(dh.k_e, rho_steam, v_steam)        # Pipe elbows (steam)
-        
-        loc_losses = Dp_c + Dp_h + Dp_e_liquid + Dp_e_steam
+        loc_losses = total_loc(rho_liquid, rho_steam, v_liquid, v_steam)
     
         # Re
         Re_liquid = rr.Reynolds(liquid_phase, v_liquid, D_pipe)
@@ -156,14 +162,24 @@ def solve_point_c(liquid_phase: Fluid, steam_phase: Fluid):
             cc += 1
             h = h_new
         
-        print(f"{Pipe_name}: h = {h:5f} m, iter = {cc}, err = {err:2e}")
+        results[Pipe_name] = [D_pipe, h]
+        # print(f"{Pipe_name}: h = {h:5f} m, iter = {cc}, err = {err:2e}")
+    
+    return results
 
-def solver():
+def solver() -> list:
     water = Fluid(FluidsList.Water)
 
     # Liquid objects from pyFluids
     liquid_phase = water.bubble_point_at_pressure(dh.p)
     steam_phase = water.dew_point_at_pressure(dh.p)
 
-    solve_point_c(liquid_phase, steam_phase)
+    # Computing the single requests of the problem
+    result = []
+
+    result.append(solve_point_a(liquid_phase, steam_phase))
+    result.append(solve_point_b(liquid_phase, steam_phase))
+    result.append(solve_point_c(liquid_phase, steam_phase))
+    
+    return result
   

@@ -1,4 +1,4 @@
-# Read csv
+# Read csv and converts to IS units
 import pandas as pd
 import pint
 
