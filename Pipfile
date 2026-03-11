@@ -6,7 +6,6 @@ name = "pypi"
 [packages]
 pyfluids = "*"
 pandas = "*"
-pint = "*"
 scipy = "*"
 
 [dev-packages]
