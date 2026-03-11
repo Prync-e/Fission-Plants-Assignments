@@ -52,7 +52,7 @@ def solve_point_a(liquid_phase: Fluid, steam_phase: Fluid) -> dict:
         dist_losses = Dp_liquid + Dp_steam
                         
         h = (loc_losses+dist_losses)/(cs.g*(rho_liquid-rho_steam))
-        results[Pipe_name] = [D_pipe, h]
+        results[Pipe_name] = [D_pipe, h, v_steam]
         # print(f"{Pipe_name}: h = {h:5f} m, v_s = {v_steam:5f}")
         
     return results
@@ -107,7 +107,7 @@ def solve_point_b(liquid_phase: Fluid, steam_phase: Fluid) -> dict:
             cc += 1
             h = h_new
         
-        results[Pipe_name] = [D_pipe, h]
+        results[Pipe_name] = [D_pipe, h, v_steam]
         # print(f"{Pipe_name}: h = {h:5f} m, iter = {cc}, err = {err:2e}")
     
     return results
@@ -162,7 +162,7 @@ def solve_point_c(liquid_phase: Fluid, steam_phase: Fluid) -> dict:
             cc += 1
             h = h_new
         
-        results[Pipe_name] = [D_pipe, h]
+        results[Pipe_name] = [D_pipe, h, v_steam]
         # print(f"{Pipe_name}: h = {h:5f} m, iter = {cc}, err = {err:2e}")
     
     return results
@@ -173,6 +173,9 @@ def solver() -> list:
     # Liquid objects from pyFluids
     liquid_phase = water.bubble_point_at_pressure(dh.p)
     steam_phase = water.dew_point_at_pressure(dh.p)
+    
+    # Computing sound speed of steam phase (physical limit)
+    rr.SOUND_SPEED = steam_phase.sound_speed
 
     # Computing the single requests of the problem
     result = []

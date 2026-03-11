@@ -1,6 +1,8 @@
 from pyfluids import Fluid
 import numpy as np
 
+SOUND_SPEED = 0
+
 def properties(fluid: Fluid) -> float|float|float:
     """Produces properties of fluids from the pyFluid library
 
