@@ -14,14 +14,21 @@ def total_loc(rho_liquid: float, rho_steam: float, v_liquid: float, v_steam: flo
     return Dp_c + Dp_h + Dp_e_liquid + Dp_e_steam
 
 
-
 def solver() -> list:
     water = Fluid(FluidsList.Water)
+    err = 1
+    toll = 1.e-2
+    cc = 0
+    COUNT = 1e4
+    
+    # Initial guess
+    mass_flow = 100                 # kg/s
+    T_avg = 120 + cs.zero_Celsius   # K
 
-    # Liquid objects from pyFluids
-    liquid_phase = water.bubble_point_at_pressure(dh.p)
-    steam_phase = water.dew_point_at_pressure(dh.p)
-
+    while err > toll and cc < COUNT:
+        print()
+        
+    
     # Computing the single requests of the problem
     result = []
     

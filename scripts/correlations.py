@@ -68,6 +68,6 @@ def shell_flow_area(Dshell: float, pitch: float, diam: float, lbaffles: float):
 def local_loss_HX1(Re: float, dshell: float, dtube: float, pitch: float, Nb = 2.) -> float:
     return 8*0.227/pow(Re, 0.193)*dshell/shell_D_equiv(pitch, dtube)*(Nb+1)
 
-# McAdams correlation
-def McAdams(Twall: float, Tsat = 100.) -> float:
-    return 2.257*pow(Twall-Tsat, 3.86)
+# McAdams correlation (inverse to get DeltaTsat)
+def inverse_McAdams(q2: float) -> float:
+    return pow(q2/2.257, 1/3.86)    # [°C - K]
