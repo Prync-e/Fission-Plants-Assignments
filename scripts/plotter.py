@@ -29,7 +29,7 @@ def plots_point_a(point_a: dict):
     
     # h plot
     plt.figure()
-    plt.plot(D_pipes, computed_h, "ro--", label="Minimum h")
+    plt.plot(D_pipes, computed_h, "ro--", label="h")
     plt.xticks(D_pipes, Pipe_names)
     plt.axhline(y=dh.L, color='k', linestyle='--', linewidth=2, label="Max pipe lenght")
     plt.xlabel("D [in]")
@@ -82,7 +82,7 @@ def plots_point_b(point_a: dict, point_b: dict):
     plt.plot(D_pipes, Delta_h_rel, "bo", label="Minimum h")
     plt.xticks(D_pipes, Pipe_names)
     plt.xlabel("D [in]")
-    plt.ylabel("$\Delta_h$ relative to point a [-]")
+    plt.ylabel("$\Delta_h / h_a$ [-]")
     plt.grid('minor')
     plt.axhline(y=0, color='k', linestyle='-', linewidth=1)
     plt.yticks([-1e-2, -1e-1, 0, 1e-2, 1e-1, 1, 10, 100],['$-10^{-1}$', '$-10^{-2}$', '0', '$10^{-2}$', '$10^{-1}$', '1', '$10$', '$100$'])    
@@ -108,7 +108,6 @@ def plots_point_c(point_b: dict, point_c: dict):
     computed_h_c = computed_h_c[index_h:]
     v_steam_b = v_steam_b[index_h:]
     v_steam_c = v_steam_c[index_h:]
-    Re_c = Re_c[index_h:]
     
     # h diff plot
     # Plotting the relative difference from the results computed in point b
@@ -118,7 +117,7 @@ def plots_point_c(point_b: dict, point_c: dict):
     plt.plot(D_pipes, Delta_h_rel, "bo", label="Minimum h")
     plt.xticks(D_pipes, Pipe_names)
     plt.xlabel("D [in]")
-    plt.ylabel("$\Delta_h$ relative to point b [-]")
+    plt.ylabel("$\Delta_h / h_b$ [-]")
     plt.grid('minor')
     plt.axhline(y=0, color='k', linestyle='-', linewidth=1)
     plt.yticks([-1e-3, 0, 1e-3, 1e-2, 1e-1, 1],['$-10^{-3}$', '0', '$10^{-3}$', '$10^{-2}$', '$10^{-1}$', '1'], color='b')  
@@ -128,8 +127,8 @@ def plots_point_c(point_b: dict, point_c: dict):
 
 def plotter(results: list):
     point_a, point_b, point_c = results
-    # plots_point_a(point_a)
-    # plots_point_b(point_a, point_b) 
+    plots_point_a(point_a)
+    plots_point_b(point_a, point_b) 
     plots_point_c(point_b, point_c)
     
     plt.show()
