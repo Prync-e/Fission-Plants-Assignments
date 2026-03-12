@@ -8,7 +8,7 @@ def split_results(res: dict) -> list|list|list:
     diam = [val[0] for val in res.values()]
     h = [val[1] for val in res.values()]
     v = [val[2] for val in res.values()]
-    
+        
     return names, diam, h, v
 
 # Specific plots for point a
@@ -87,12 +87,50 @@ def plots_point_b(point_a: dict, point_b: dict):
     plt.axhline(y=0, color='k', linestyle='-', linewidth=1)
     plt.yticks([-1e-2, -1e-1, 0, 1e-2, 1e-1, 1, 10, 100],['$-10^{-1}$', '$-10^{-2}$', '0', '$10^{-2}$', '$10^{-1}$', '1', '$10$', '$100$'])    
     plt.yscale('symlog', linthresh=1e-2)
+    
+    
+# Specific plots for point c
+def plots_point_c(point_b: dict, point_c: dict):
+    Pipe_names, D_pipes, computed_h_b, v_steam_b = split_results(point_b)   
+    _, _, computed_h_c, v_steam_c = split_results(point_c)
+    
+    # Look for the first accepteable h (finite)
+    index_h = 0
+    for h in computed_h_c:
+        if np.isfinite(h):
+            index_h = computed_h_c.index(h)
+            break
+    
+    # Slicing the result lists
+    Pipe_names = list(Pipe_names)[index_h:]
+    D_pipes = D_pipes[index_h:]
+    computed_h_b = computed_h_b[index_h:]
+    computed_h_c = computed_h_c[index_h:]
+    v_steam_b = v_steam_b[index_h:]
+    v_steam_c = v_steam_c[index_h:]
+    Re_c = Re_c[index_h:]
+    
+    # h diff plot
+    # Plotting the relative difference from the results computed in point b
+    # To show the difference of rough pipes
+    Delta_h_rel = np.array(computed_h_c) / np.array(computed_h_b) - 1
+    plt.figure()
+    plt.plot(D_pipes, Delta_h_rel, "bo", label="Minimum h")
+    plt.xticks(D_pipes, Pipe_names)
+    plt.xlabel("D [in]")
+    plt.ylabel("$\Delta_h$ relative to point b [-]")
+    plt.grid('minor')
+    plt.axhline(y=0, color='k', linestyle='-', linewidth=1)
+    plt.yticks([-1e-3, 0, 1e-3, 1e-2, 1e-1, 1],['$-10^{-3}$', '0', '$10^{-3}$', '$10^{-2}$', '$10^{-1}$', '1'], color='b')  
+    plt.ylim([-1e-3,1])  
+    plt.yscale('symlog', linthresh=1e-3)
 
 
 def plotter(results: list):
     point_a, point_b, point_c = results
-    plots_point_a(point_a)
-    plots_point_b(point_a, point_b)   
+    # plots_point_a(point_a)
+    # plots_point_b(point_a, point_b) 
+    plots_point_c(point_b, point_c)
     
     plt.show()
     
