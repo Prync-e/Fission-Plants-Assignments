@@ -3,6 +3,15 @@ from scipy import constants as cs
 import data.pipe_handler as pp
 import data.assignment_data as dh
 import scripts.correlations as rr
+import pandas as pd
+
+
+# Export the results on output file
+def writer(results: dict, fields: list, out = "out/results.csv"):
+    df = pd.DataFrame(results, index=fields)
+    df = df.T
+    df.to_csv(out)
+
 
 # Total localized losses
 def total_loc(rho_liquid: float, rho_steam: float, v_liquid: float, v_steam: float) -> float:
@@ -14,7 +23,7 @@ def total_loc(rho_liquid: float, rho_steam: float, v_liquid: float, v_steam: flo
     return Dp_c + Dp_h + Dp_e_liquid + Dp_e_steam
 
 # Solution of point a
-def solve_point_a(liquid_phase: Fluid, steam_phase: Fluid) -> dict:  
+def solve_point_a(liquid_phase: Fluid, steam_phase: Fluid):  
     # Saturated water properties (density, enthalpy)
     rho_liquid, h_liquid, _ = rr.properties(liquid_phase)
     
@@ -39,7 +48,7 @@ def solve_point_a(liquid_phase: Fluid, steam_phase: Fluid) -> dict:
     
         # Re
         Re_liquid = rr.Reynolds(liquid_phase, v_liquid, D_pipe)
-        Re_steam = rr.Reynolds(steam_phase, v_liquid, D_pipe)
+        Re_steam = rr.Reynolds(steam_phase, v_steam, D_pipe)
     
         # friction factor
         f_liquid = rr.friction_smooth(Re_liquid)
@@ -55,10 +64,11 @@ def solve_point_a(liquid_phase: Fluid, steam_phase: Fluid) -> dict:
         results[Pipe_name] = [D_pipe, h, v_steam]
         # print(f"{Pipe_name}: h = {h:5f} m, v_s = {v_steam:5f}")
         
-    return results
+    writer(results, ['D [m]', 'h [m]', 'v_steam [m/s]'], "out/point_a.csv")
+    
         
 # Solution of point b       
-def solve_point_b(liquid_phase: Fluid, steam_phase: Fluid) -> dict:
+def solve_point_b(liquid_phase: Fluid, steam_phase: Fluid):
     # Saturated water properties (density, enthalpy)
     rho_liquid, h_liquid, _ = rr.properties(liquid_phase)
     
@@ -83,7 +93,7 @@ def solve_point_b(liquid_phase: Fluid, steam_phase: Fluid) -> dict:
     
         # Re
         Re_liquid = rr.Reynolds(liquid_phase, v_liquid, D_pipe)
-        Re_steam = rr.Reynolds(steam_phase, v_liquid, D_pipe)
+        Re_steam = rr.Reynolds(steam_phase, v_steam, D_pipe)
     
         # friction factor
         f_liquid = rr.friction_smooth(Re_liquid)
@@ -110,10 +120,11 @@ def solve_point_b(liquid_phase: Fluid, steam_phase: Fluid) -> dict:
         results[Pipe_name] = [D_pipe, h, v_steam]
         # print(f"{Pipe_name}: h = {h:5f} m, iter = {cc}, err = {err:2e}")
     
-    return results
+    writer(results, ['D [m]', 'h [m]', 'v_steam [m/s]'], "out/point_b.csv")
+
 
 # Solution of point c       
-def solve_point_c(liquid_phase: Fluid, steam_phase: Fluid) -> dict:
+def solve_point_c(liquid_phase: Fluid, steam_phase: Fluid):
     # Saturated water properties (density, enthalpy)
     rho_liquid, h_liquid, _ = rr.properties(liquid_phase)
     
@@ -138,7 +149,7 @@ def solve_point_c(liquid_phase: Fluid, steam_phase: Fluid) -> dict:
     
         # Re
         Re_liquid = rr.Reynolds(liquid_phase, v_liquid, D_pipe)
-        Re_steam = rr.Reynolds(steam_phase, v_liquid, D_pipe)
+        Re_steam = rr.Reynolds(steam_phase, v_steam, D_pipe)
     
         # friction factor
         f_liquid = rr.friction_rough(Re_liquid, dh.epsilon, D_pipe)
@@ -162,12 +173,13 @@ def solve_point_c(liquid_phase: Fluid, steam_phase: Fluid) -> dict:
             cc += 1
             h = h_new
         
-        results[Pipe_name] = [D_pipe, h, v_steam]
+        results[Pipe_name] = [D_pipe, h, v_steam, Re_steam]
         # print(f"{Pipe_name}: h = {h:5f} m, iter = {cc}, err = {err:2e}")
     
-    return results
+    writer(results, ['D [m]', 'h [m]', 'v_steam [m/s]', 'Re_steam [-]'], "out/point_c.csv")
 
-def solver() -> list:
+
+def solver():
     water = Fluid(FluidsList.Water)
 
     # Liquid objects from pyFluids
@@ -178,11 +190,6 @@ def solver() -> list:
     rr.SOUND_SPEED = steam_phase.sound_speed
 
     # Computing the single requests of the problem
-    result = []
-
-    result.append(solve_point_a(liquid_phase, steam_phase))
-    result.append(solve_point_b(liquid_phase, steam_phase))
-    result.append(solve_point_c(liquid_phase, steam_phase))
-    
-    return result
-  
+    solve_point_a(liquid_phase, steam_phase)
+    solve_point_b(liquid_phase, steam_phase)
+    solve_point_c(liquid_phase, steam_phase)

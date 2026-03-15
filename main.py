@@ -4,8 +4,8 @@ from scripts.plotter import plotter
 
 
 def main():
-    results = solver()
-    plotter(results)
+    solver()
+    plotter()
     
 
 if __name__ == "__main__":

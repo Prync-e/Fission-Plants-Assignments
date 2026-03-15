@@ -1,19 +1,18 @@
 import matplotlib.pyplot as plt
 import data.assignment_data as dh
 import numpy as np
+import pandas as pd
 
-# Handles the points results (dictionaries)
-def split_results(res: dict) -> list|list|list:
-    names = res.keys()
-    diam = [val[0] for val in res.values()]
-    h = [val[1] for val in res.values()]
-    v = [val[2] for val in res.values()]
-        
-    return names, diam, h, v
+# Handles the points results (csv)
+def split_results(res: str) -> list:
+    df = pd.read_csv(res)
+    results = [list(df.loc[:][col]) for col in df.keys()]
+
+    return results
 
 # Specific plots for point a
-def plots_point_a(point_a: dict):
-    Pipe_names, D_pipes, computed_h, v_steam = split_results(point_a)   
+def plots_point_a():
+    Pipe_names, D_pipes, computed_h, v_steam = split_results("out/point_a.csv")   
     
     # Look for the first accepteable h (h<L)
     index_h = 0
@@ -42,9 +41,9 @@ def plots_point_a(point_a: dict):
     
     
 # Specific plots for point b
-def plots_point_b(point_a: dict, point_b: dict):
-    Pipe_names, D_pipes, computed_h_a, _ = split_results(point_a)   
-    _, _, computed_h_b, v_steam_b = split_results(point_b)
+def plots_point_b():
+    Pipe_names, D_pipes, computed_h_a, _ = split_results("out/point_a.csv")   
+    _, _, computed_h_b, v_steam_b = split_results("out/point_b.csv")
     
     # Look for the first accepteable h (finite)
     index_h = 0
@@ -90,9 +89,9 @@ def plots_point_b(point_a: dict, point_b: dict):
     
     
 # Specific plots for point c
-def plots_point_c(point_b: dict, point_c: dict):
-    Pipe_names, D_pipes, computed_h_b, v_steam_b = split_results(point_b)   
-    _, _, computed_h_c, v_steam_c = split_results(point_c)
+def plots_point_c():
+    Pipe_names, D_pipes, computed_h_b, v_steam_b = split_results("out/point_b.csv")   
+    _, _, computed_h_c, v_steam_c, Re = split_results("out/point_c.csv")
     
     # Look for the first accepteable h (finite)
     index_h = 0
@@ -125,11 +124,10 @@ def plots_point_c(point_b: dict, point_c: dict):
     plt.yscale('symlog', linthresh=1e-3)
 
 
-def plotter(results: list):
-    point_a, point_b, point_c = results
-    plots_point_a(point_a)
-    plots_point_b(point_a, point_b) 
-    plots_point_c(point_b, point_c)
+def plotter():
+    plots_point_a()
+    plots_point_b() 
+    plots_point_c()
     
     plt.show()
     
