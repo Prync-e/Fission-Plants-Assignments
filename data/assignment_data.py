@@ -1,5 +1,5 @@
 # Problem data
-Pth = 600e6                 # Wth
+Pth = 6e6                   # Wth
 DeltaP_Vessel = 1.2e5       # Pa
 mass_rate_reference = 3200  # kg/s
 
