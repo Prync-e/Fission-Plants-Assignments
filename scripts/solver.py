@@ -15,6 +15,8 @@ def solver():
     h_out_HX2 = q2_HX2/Delta_Tsat
     Din_HX2 = dh.Dout_HX2 - 2*dh.thick_HX2
     
+    # Leg fixed parameter 
+
     # Iterative quantities
     err = 1
     toll = 1.e-5
@@ -65,4 +67,38 @@ def solver():
         T_hot = T_hot_new
     
     print(f'{cc} iter: T hot = {T_hot:.4f}, relative err: {err:.3e}')
-        
+    
+    # Losses of hot leg ISC
+    # Properties of hot water
+    w_hot = water.with_state(Input.temperature(T_hot), Input.pressure(dh.p_ISC))
+    rho_hot= w_hot.density
+    Re_hot=rr.Reynolds_massrate(w_hot,mass_flow,dh.Dout_ISC)
+    # Localized 
+    loc_90_H=rr.localized_loss(dh.k_loss_ISC,rho_hot,mass_flow,dh.Dout_ISC,)
+    # Distributed 
+    f_hot=rr.friction_rough(Re_hot,dh.epsilon_rel_ISC,)
+    dist_H_leg=rr.distributed_loss(dh.L_H_ISC,dh.Dout_ISC,mass_flow,f_hot,rho_hot)
+    # Total losses inside the hot leg ISC
+    HOT_losses=dh.N_bends*loc_90_H+dist_H_leg
+   
+    # Losses of cold leg ISC
+    # Properties of cold water
+    w_cold = water.with_state(Input.temperature(T_cold), Input.pressure(dh.p_ISC))
+    rho_cold= w_cold.density
+    Re_cold=rr.Reynolds_massrate(w_cold,mass_flow,dh.Dout_ISC)
+    # Localized 
+    loc_90_C=rr.localized_loss(dh.k_loss_ISC,rho_cold,mass_flow,dh.Dout_ISC,)
+    # Distributed 
+    f_cold=rr.friction_rough(Re_cold,dh.epsilon_rel_ISC,)
+    dist_C_leg=rr.distributed_loss(dh.L_H_ISC,dh.Dout_ISC,mass_flow,f_cold,rho_cold)
+    # Total losses inside the cold leg ISC
+    Cold_losses=dh.N_bends*loc_90_C+dist_C_leg
+    
+    # Losses inside the HX1 shell
+    # HX1 shell fixed parameters 
+    Deq_shell= rr.shell_D_equiv(dh.pitch_HX1,dh.Dout_HX1)
+    A_shell= rr.shell_flow_area(dh.Din_shell_HX1,dh.pitch_HX1,dh.Dout_HX1,dh.lbaffles_HX1)
+    # fludi parameters whitin shell
+    w_ave= water.with_state(Input.temperature(T_avg), Input.pressure(dh.p_ISC))
+    rho_ave= w_ave.density
+    Re_shell=rr.Reynolds_massrate(w_ave,mass_flow,)

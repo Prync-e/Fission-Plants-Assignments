@@ -31,10 +31,12 @@ FT_HX1 = 0.7                # -, correction factor for MLDT
 # ISC
 p_ISC = 70e5                # Pa
 Dout_ISC = 16               # in, schedule 100
-L_ISC = 40                  # m
-epsilon_rel_PSC = 2e-4      # -, epsilon/D
+L_H_ISC = 20                # m
+L_C_ISC = 20                # m
+epsilon_rel_ISC = 2e-4      # -, epsilon/D
 k_loss_ISC = 0.45
 H_ISC = 10                  # m
+N_bends= 2                  # the same number for heat and cold legs
 
 # HX2
 Dout_HX2 = 25.4e-3          # m

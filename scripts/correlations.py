@@ -24,6 +24,11 @@ def Reynolds_massrate(fluid: Fluid, mass_rate: float, diam: float) -> float:
     Re = 4 * mass_rate / (mu * diam * np.pi)
     return Re
 
+def Reynolds_massrate_area(fluid: Fluid, mass_rate: float, area: float) -> float:
+    _,_,mu = properties(fluid)
+    Re = 4 * mass_rate / (mu * diam * np.pi)
+    return Re
+
 # Prandtl number
 def Prandtl(fluid: Fluid):
     return fluid.prandtl
@@ -59,12 +64,12 @@ def friction_rough(Re: float, epsilon_rel: float) -> float:
     return 64/Re if Re < 3000 else f
 
 # Localized losses
-def localized_loss(k: float, rho: float, v: float) -> float:
-    return 0.5*k*rho*v**2
+def localized_loss(k: float, rho: float, mass_rate: float, diam: float) -> float:
+    return 0.5*k/rho*(mass_rate/(diam**2*np.pi/4))**2
 
 # Distributed losses
-def distributed_loss(l: float, d: float, v: float, f: float, rho: float) -> float:
-    return 0.5*f*l/d*rho*v**2
+def distributed_loss(l: float, d: float, mass_rate: float, f: float, rho: float) -> float:
+    return 0.5*f*l/d/rho*(mass_rate/(d**2*np.pi/4))**2
 
 # Equivalent shell-side diameter for triangular lattice (HX)
 def shell_D_equiv(pitch: float, diam: float) -> float:
@@ -85,3 +90,10 @@ def local_loss_HX1(Re: float, dshell: float, dtube: float, pitch: float, Nb = 2.
 # McAdams correlation (inverse to get DeltaTsat)
 def inverse_McAdams(q2: float) -> float:
     return pow(q2/2.257, 1/3.86)    # [°C - K]
+
+# Expansion losses
+def exp_loss(A_in: float, A_out: float) -> float:
+    return pow(1-(A_in/A_out),2)
+# Contraction losses
+def con_loss(A_in: float, A_out: float) -> float:
+    return 0.5*(1-(A_out/A_in))
