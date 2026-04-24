@@ -5,7 +5,6 @@ from scripts.plotter import plotter
 def main():
     solver()
     
-    
 if __name__ == "__main__":
     main()
     

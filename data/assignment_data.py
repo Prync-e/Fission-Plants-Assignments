@@ -12,6 +12,7 @@ k_loss_PSC = 0.45
 k_valve_PSC = 0.12
 H1_PSC = 7                  # m
 H2_PSC = 3                  # m
+N_bends_PSC = 2
 
 # HX1
 Dout_HX1 = 19.05e-3         # m
@@ -36,7 +37,7 @@ L_C_ISC = 20                # m
 epsilon_rel_ISC = 2e-4      # -, epsilon/D
 k_loss_ISC = 0.45
 H_ISC = 10                  # m
-N_bends= 2                  # the same number for heat and cold legs
+N_bends_ISC = 2             # the same number for heat and cold legs
 
 # HX2
 Dout_HX2 = 25.4e-3          # m

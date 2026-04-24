@@ -24,7 +24,7 @@ def Reynolds_massrate(fluid: Fluid, mass_rate: float, diam: float) -> float:
     Re = 4 * mass_rate / (mu * diam * np.pi)
     return Re
 
-def Reynolds_massrate_area(fluid: Fluid, mass_rate: float, area: float) -> float:
+def Reynolds_massrate_area(fluid: Fluid, mass_rate: float, diam: float) -> float:
     _,_,mu = properties(fluid)
     Re = 4 * mass_rate / (mu * diam * np.pi)
     return Re
@@ -64,12 +64,12 @@ def friction_rough(Re: float, epsilon_rel: float) -> float:
     return 64/Re if Re < 3000 else f
 
 # Localized losses
-def localized_loss(k: float, rho: float, mass_rate: float, diam: float) -> float:
-    return 0.5*k/rho*(mass_rate/(diam**2*np.pi/4))**2
+def localized_loss_coeff(k: float, rho: float, diam: float) -> float:
+    return 0.5*k/rho/(diam**2*np.pi/4)**2
 
 # Distributed losses
-def distributed_loss(l: float, d: float, mass_rate: float, f: float, rho: float) -> float:
-    return 0.5*f*l/d/rho*(mass_rate/(d**2*np.pi/4))**2
+def distributed_loss_coeff(l: float, d: float, f: float, rho: float) -> float:
+    return 0.5*f*l/d/rho/(d**2*np.pi/4)**2
 
 # Equivalent shell-side diameter for triangular lattice (HX)
 def shell_D_equiv(pitch: float, diam: float) -> float:
@@ -95,5 +95,5 @@ def inverse_McAdams(q2: float) -> float:
 def exp_loss(A_in: float, A_out: float) -> float:
     return pow(1-(A_in/A_out),2)
 # Contraction losses
-def con_loss(A_in: float, A_out: float) -> float:
+def com_loss(A_in: float, A_out: float) -> float:
     return 0.5*(1-(A_out/A_in))

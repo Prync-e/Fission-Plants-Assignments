@@ -6,7 +6,7 @@ df = pd.read_csv("data/tubi_ansi.csv")
 ROWS, _ = df.shape
 
 # Returning the inner diameter of the i-th row of the j-th col and its name
-def get_diameter(row: int, col = "100") -> str|float:
+def get_diameter(row: int, col = "100") -> tuple[str,float]:
     # Reading from csv
     thickness = df.loc[row][col]
     D_out = df.loc[row]["Outside_Diameter"]
