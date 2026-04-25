@@ -19,7 +19,7 @@ def get_diameter(row: int, col = "100") -> tuple[str,float]:
 
     return name,D_in
 
-# Returning the row of the pipe, given its outer diameter in inches
+# Returning the row of the pipe in the data file, given its outer diameter in inches
 def get_row(D_out: float) -> int:
     for r in range(ROWS):
         if float(df.loc[r]["Outside_Diameter"]) == D_out:

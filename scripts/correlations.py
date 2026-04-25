@@ -2,7 +2,7 @@ from pyfluids import Fluid
 import numpy as np
 
 # Fluid properties function
-def properties(fluid: Fluid) -> float|float|float:
+def properties(fluid: Fluid) -> tuple[float,float,float]:
     """Produces properties of fluids from the pyFluid library
 
     Args:

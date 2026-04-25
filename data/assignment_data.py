@@ -8,11 +8,11 @@ p_PSC = 75e5                # Pa
 Dout_PSC = 16               # in, schedule 100
 L_PSC = 16                  # m
 epsilon_rel_PSC = 2e-4      # -, epsilon/D
-k_loss_PSC = 0.45
-k_valve_PSC = 0.12
+k_loss_PSC = 0.45           # -
+k_valve_PSC = 0.12          # -
 H1_PSC = 7                  # m
 H2_PSC = 3                  # m
-N_bends_PSC = 2
+N_bends_PSC = 2             # -
 
 # HX1
 Dout_HX1 = 19.05e-3         # m
@@ -20,7 +20,7 @@ thick_HX1 = 1.24e-3         # m
 Ntubes_HX1 = 897            # -, tubes in the heat exchanger
 pitch_HX1 = 28.5e-3         # m
 Din_shell_HX1 = 1.5         # m
-Nbaffles_HX1 = 2
+Nbaffles_HX1 = 2            # -
 lbaffles_HX1 = 1.6          # m
 Ltubes_HX1 = 9.314          # m
 k_HX1 = 15                  # W m-1 K-1
@@ -35,7 +35,7 @@ Dout_ISC = 16               # in, schedule 100
 L_H_ISC = 20                # m
 L_C_ISC = 20                # m
 epsilon_rel_ISC = 2e-4      # -, epsilon/D
-k_loss_ISC = 0.45
+k_loss_ISC = 0.45           # -
 H_ISC = 10                  # m
 N_bends_ISC = 2             # the same number for heat and cold legs
 

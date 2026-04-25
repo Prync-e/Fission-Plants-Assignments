@@ -9,20 +9,19 @@ def solver():
     # Problem setup
     water = Fluid(FluidsList.Water)
     
-    # HX2 fixed parameter
-    q2_HX2 = dh.Pth/dh.Atransfer_HX2
+    # HX2 fixed parameters
+    q2_HX2 = dh.Pth/dh.Atransfer_HX2            # Power flux
     Delta_Tsat = rr.inverse_McAdams(q2_HX2)
     h_out_HX2 = q2_HX2/Delta_Tsat
     Din_HX2 = dh.Dout_HX2 - 2*dh.thick_HX2
 
-    # Leg fixed parameter 
+    # Leg fixed parameters
     _, Din_ISC = pp.get_diameter(pp.get_row(dh.Dout_ISC), col='100')
     
     # HX1 shell fixed parameters 
-    Deq_shell = rr.shell_D_equiv(dh.pitch_HX1,dh.Dout_HX1)
     A_shell = rr.shell_flow_area(dh.Din_shell_HX1,dh.pitch_HX1,dh.Dout_HX1,dh.lbaffles_HX1)
 
-    # Iterative quantities
+    # Iterative quantities for outer loop (mass flow rate)
     err_out = 1
     toll_out = 1.e-5
     cc_out = 0
@@ -35,7 +34,7 @@ def solver():
     while err_out > toll_out and cc_out < COUNT:
         # print(f'{cc_out} iter: mass_rate = {mass_flow:.4f}, relative err: {err_out:.3e}')
         
-        # Iterative quantities
+        # Iterative quantities for inner loop (Temperature)
         err_in = 1
         toll_in = 1.e-5
         cc_in = 0
@@ -48,32 +47,30 @@ def solver():
             # print(f'{cc_in} iter: T hot = {T_hot:.4f}, relative err: {err_in:.3e}')
             
             # Fluid states definition
-            w_hot = water.with_state(Input.temperature(T_hot), Input.pressure(dh.p_ISC))
+            w_hot = water.with_state(Input.temperature(T_hot), Input.pressure(dh.p_ISC))    # Hot fluid
             h_hot = w_hot.enthalpy
             h_cold = h_hot - Delta_h
-            w_cold = water.with_state(Input.pressure(dh.p_ISC), Input.enthalpy(h_cold))
+            w_cold = water.with_state(Input.pressure(dh.p_ISC), Input.enthalpy(h_cold))     # Cold fluid
             T_cold = w_cold.temperature
             T_avg = (T_hot + T_cold)/2
-            w_avg = water.with_state(Input.temperature(T_avg), Input.pressure(dh.p_ISC))
+            w_avg = water.with_state(Input.temperature(T_avg), Input.pressure(dh.p_ISC))    # Average fluid (HX1, HX2)
             
             # Fluid properties in HX2 (T_avg) 
             Nu = rr.Nusselt(w_avg, mass_flow_pipe_HX2, Din_HX2, dh.epsilon_rel_HX2)
             k_w = w_avg.conductivity
             cp_w = w_avg.specific_heat
-            
             h_in_HX2 = Nu * k_w / Din_HX2
             
             # Solving HX2
             inverse_Uw_HX2 = dh.Dout_HX2/Din_HX2/h_in_HX2 + dh.Dout_HX2*m.log(dh.Dout_HX2/Din_HX2)/2/dh.k_HX2 + 1/h_out_HX2
-            Uw_HX2 = pow(inverse_Uw_HX2 ,-1)
-            NTUw_HX2 = Uw_HX2*dh.Atransfer_HX2/mass_flow/cp_w
-            
-            DeltaT_ML_HX2 = q2_HX2 / Uw_HX2
+            Uw_HX2 = pow(inverse_Uw_HX2 ,-1)                    # Global heat transfer coeff
+            NTUw_HX2 = Uw_HX2*dh.Atransfer_HX2/mass_flow/cp_w   # Number transfer unit
+            DeltaT_ML_HX2 = q2_HX2 / Uw_HX2                     # Delta T mean log
             
             # Fining the new T_hot
             T_hot_new = 100 + DeltaT_ML_HX2*NTUw_HX2/(1-m.exp(-NTUw_HX2))
             
-            # Updating loop parameters
+            # Updating inner loop parameters
             cc_in += 1
             err_in = abs(T_hot-T_hot_new)/T_hot
             
@@ -81,7 +78,7 @@ def solver():
         
         # print(f'{cc_in} iter: T hot = {T_hot:.4f}, relative err: {err_in:.3e}')
         
-        # Re-definition of fluids
+        # Re-definition of fluids for the final T
         w_hot = water.with_state(Input.temperature(T_hot), Input.pressure(dh.p_ISC))
         h_hot = w_hot.enthalpy
         h_cold = h_hot - Delta_h
@@ -96,10 +93,9 @@ def solver():
         rho_cold = w_cold.density
         Re_cold = rr.Reynolds_massrate(w_cold,mass_flow,Din_ISC)
         
-        
         # Losses of hot leg ISC
         # Localized 
-        loc_90_H = rr.localized_loss_coeff(dh.k_loss_ISC,rho_hot,Din_ISC)
+        loc_90_H = rr.localized_loss_coeff(dh.k_loss_ISC,rho_hot,Din_ISC)           # 90° bends
         # Distributed 
         f_hot = rr.friction_rough(Re_hot,dh.epsilon_rel_ISC)
         dist_H_leg = rr.distributed_loss_coeff(dh.L_H_ISC,Din_ISC,f_hot,rho_hot)
@@ -140,7 +136,7 @@ def solver():
         # New mass rate
         mass_flow_new = pow(Potential/(Hot_losses + Cold_losses + Shell_HX1_losses + HX2_losses), 0.5)
         
-        # Updating loop parameters
+        # Updating outer loop parameters
         cc_out += 1
         err_out = abs(mass_flow-mass_flow_new)/mass_flow
             
@@ -150,7 +146,7 @@ def solver():
     print(f'ISC iteration complete:\nmass flow rate = {mass_flow:.4f} kg/s\nAverage temperature = {T_avg:.4f} °C\nHot channel temperature = {T_hot:.4f} °C')
     print('---------------------------------------------------------')
     
-    # Definition of final ISC quantities
+    # Definition of definitive ISC quantities
     T_hot_ISC = T_hot
     T_cold_ISC = T_cold
     mass_flow_ISC = mass_flow
