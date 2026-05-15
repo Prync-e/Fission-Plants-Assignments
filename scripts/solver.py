@@ -4,9 +4,8 @@ import numpy as np
 import data.pipe_handler as pp
 import data.assignment_data as dh
 # import scripts.correlations as rr
-import math as m
 
-def solver():
+def solver() -> tuple:
     # Problem setup
     
     # Disceretize the z domain
@@ -22,6 +21,7 @@ def solver():
     # Average heat generation rate
     qv_avg = dh.P * dh.heat_in_fuel / V_fuel
     qv_max = qv_avg * dh.Fq
+    qv = lambda z: qv_max*np.cos(cs.pi*z/He)
     
     # Average coolant mass velocity
     G_avg = dh.mass_flow_coolant / dh.A_flow_coolant
@@ -36,7 +36,7 @@ def solver():
     mass_flow_subchannel = G_avg * A_subchannel
     
     # Enthalpy profile in the coolant (qv_max in MW)
-    enthalpy = lambda z: enthalpy_in + 1.0267*(qv_max*1e-6 * Fuel_pellet_cross_sec * He)/(mass_flow_subchannel * cs.pi)*\
+    enthalpy = lambda z: enthalpy_in + 1.0267*(qv_max * Fuel_pellet_cross_sec * He)/(mass_flow_subchannel * cs.pi)*\
         (np.sin(cs.pi * z / He) +  np.sin(cs.pi * dh.H/2/He))
     
     # Saturation conditions
@@ -50,7 +50,7 @@ def solver():
     Coolant_profs = {
         'T':[],
         'mu':[],
-        'cp':[],
+        'Pr':[],
         'k':[]
     }
     
@@ -62,14 +62,29 @@ def solver():
             
         Coolant_profs['T'].append(coolant.temperature)
         Coolant_profs['mu'].append(coolant.dynamic_viscosity)
-        Coolant_profs['cp'].append(coolant.specific_heat)
+        Coolant_profs['Pr'].append(coolant.prandtl)
         Coolant_profs['k'].append(coolant.conductivity)
         
     # Equilibrium quality profile
     x_eq = (enthalpy(z)-enthalpy_sat_water)/(enthalpy_sat_steam-enthalpy_sat_water)
 
     # Outer cladding temperature
-    '''C = 0.042*dh.pitch/dh.D_fuel_road - 0.024
+    C = 0.042*dh.pitch/dh.D_fuel_road - 0.024
     D_eq = 4*np.sqrt(A_subchannel/cs.pi)
-    Nu = list(C*pow((G_avg*D_eq/mu),0.8)*pow((cp*mu/k),0.4) for _,mu,cp,k in Coolant_profs.values().items())
-    print(Nu)'''
+    Coolant_profs.update({'Nu':[C*pow((G_avg*D_eq/mu),0.8)*pow((Pr),0.4) for mu,Pr in zip(Coolant_profs['mu'], Coolant_profs['Pr'])]})
+    Coolant_profs.update({'h':[Nu*k/D_eq for Nu,k in zip(Coolant_profs['Nu'], Coolant_profs['k'])]})
+    
+    q2_hot_subchannel = qv(z) * (dh.D_fuel_pellet**2/4) / (dh.D_fuel_pellet)    # W/m2 - total heat in a small cylinder dz / surface area
+    T_co_SP = [(T + q/h) for q,T,h in zip(q2_hot_subchannel, Coolant_profs['T'], Coolant_profs['h'])]      # Single phase convection
+    T_co_JL = [(T_sat + 25*pow((q*1e-6),0.25)*np.exp(-dh.p_coolant*1e-5/62)) for q in q2_hot_subchannel]   # Jens-Lottes correlation
+    
+    T_co = [min(SP, JL) for SP,JL in zip(T_co_SP, T_co_JL)]
+    
+    # Finding the start of the subcooled boiling region
+    z_scb = next(z[i] for i in range(len(z)) if T_co_SP[i] > T_co_JL[i])
+    
+    # Finding the detachment
+    Tl_D = [(T_sat - q/5/h) for q,h in zip(q2_hot_subchannel, Coolant_profs['h'])]
+    z_D = next((z[i] for i in range(len(z)) if Coolant_profs['T'][i] > Tl_D[i]), 0)
+    
+    return z, [Coolant_profs['T'], T_co], z_scb, [T_co_SP, T_co_JL]

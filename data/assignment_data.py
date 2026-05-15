@@ -10,6 +10,7 @@ delta = Dc/Dr*Lr                # m, reflector savings
 heat_in_fuel = 0.974            # -, heat generated in fuel
 Fq = 2.6                        # -, heat flux hot channel factor
 P = 3400e6                      # W, reactor core heat output
+Q2_avg = 199300*cs.Btu/cs.foot**2/3600  # Wm^-2, average heat flux
 
 # Fuel pellets
 N_rods = 41448                  # -, number of fuel rods
@@ -19,11 +20,11 @@ t_gap = 0.0065*cs.inch          # m, gap between fuel and cladding
 t_cladding = 0.0225*cs.inch     # m, cladding thickness
 
 # Coolant flow
-mass_flow_coolant = 106.8*cs.lb/3600    # kg/s, effective mass flow rate in the core
-A_flow_coolant = 41.8*cs.foot**2        # m^2, effective flow area
-p_coolant = 2250*cs.psi         # Pa, coolant pressure
+mass_flow_coolant = 106.8*1e6*cs.lb/3600                # kg/s, effective mass flow rate in the core
+A_flow_coolant = 41.8*cs.foot**2                        # m^2, effective flow area
+p_coolant = 2250*cs.psi                                 # Pa, coolant pressure
 T_in_coolant = cs.convert_temperature(535.0, 'F', 'C')  # °C, inlet coolant temperature
 pitch = 0.496*cs.inch           # m, core pitch
 
 # Numerics
-n_points = 11
+n_points = 1001

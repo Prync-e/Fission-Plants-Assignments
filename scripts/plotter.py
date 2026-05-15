@@ -1,42 +1,29 @@
 import matplotlib.pyplot as plt
 import data.assignment_data as dh
+import numpy as np
 
-# Handles the points results (dictionaries)
-def split_results(res: dict) -> list|list|list:
-    names = res.keys()
-    diam = [val[0] for val in res.values()]
-    h = [val[1] for val in res.values()]
+def plotter(results: tuple):
+    z, T_profiles, z_scb, T_co_methods = results
     
-    return names, diam, h
-
-# Specific plots for point a
-def plots_point_a(point_a: dict):
-    Pipe_names, D_pipes, computed_h = split_results(point_a)   
-    
-    # Look for the first accepteable h (h<L)
-    index_h = 0
-    for h in computed_h:
-        if h < dh.L:
-            index_h = computed_h.index(h) - 1
-            break
-    
-    # Slicing the result lists
-    Pipe_names = list(Pipe_names)[index_h:]
-    D_pipes = D_pipes[index_h:]
-    computed_h = computed_h[index_h:]
-    
-    plt.plot(D_pipes, computed_h, "ro-", label="Minimum h")
-    plt.xticks(D_pipes, Pipe_names)
-    plt.axhline(y=dh.L, color='k', linestyle='--', linewidth=2, label="Max pipe lenght")
-    plt.xlabel("D [in]")
-    plt.ylabel("h [m]")
-    plt.legend()
+    plt.figure()
+    plt.plot(np.transpose(T_profiles),z,label=['Coolant','Cladding out'])
+    plt.legend()    
     plt.grid()
+    plt.xlabel('Temperature [°C]')
+    plt.ylabel('Axial coordinate [m]')
+    plt.yticks([-dh.H/2,-1,0,1,dh.H/2],['-H/2','-1','0','1','H/2'])
+    plt.ylim((-dh.H/2,dh.H/2))  
+    
+    plt.figure()
+    plt.gca().set_prop_cycle('color',['black','red', 'lime', 'blue'])
+    plt.plot(np.transpose(T_co_methods),z,label=['T$_{co,SP}$','T$_{co,J-L}$'])
+    plt.plot(T_profiles[1],z,color='lime', linestyle='--',label='T cladding out')
+    plt.legend()    
+    plt.grid()
+    plt.xlabel('Temperature [°C]')
+    plt.ylabel('Axial coordinate [m]')
+    plt.yticks([-dh.H/2,-1,0,1,dh.H/2],['-H/2','-1','0','1','H/2'])
+    plt.ylim((-dh.H/2,dh.H/2)) 
+      
     plt.show()
-
-
-def plotter(results: list):
-    point_a, point_b, point_c = results
-    plots_point_a(point_a)
-    
-    
+        
