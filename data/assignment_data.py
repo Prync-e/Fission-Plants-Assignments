@@ -1,50 +1,29 @@
+import scipy.constants as cs
+
 # Problem data
-Pth = 6e6                   # Wth
-DeltaP_Vessel = 1.2e5       # Pa
-mass_rate_reference = 3200  # kg/s
+H = 168*cs.inch                 # m, active height
+lambda_tr = 0.29e-2             # m, transport length
+Dc = lambda_tr/3                # -, diffusion coefficient in the core
+Dr = 0.16                       # -, diffusion coefficient in the reflector
+Lr = 2.85e-2                    # m, diffusion length in the reflector
+delta = Dc/Dr*Lr                # m, reflector savings
+heat_in_fuel = 0.974            # -, heat generated in fuel
+Fq = 2.6                        # -, heat flux hot channel factor
+P = 3400e6                      # W, reactor core heat output
 
-# PSC
-p_PSC = 75e5                # Pa
-Dout_PSC = 16               # in, schedule 100
-L_PSC = 16                  # m
-epsilon_rel_PSC = 2e-4      # -, epsilon/D
-k_loss_PSC = 0.45           # -
-k_valve_PSC = 0.12          # -
-H1_PSC = 7                  # m
-H2_PSC = 3                  # m
-N_bends_PSC = 2             # -
+# Fuel pellets
+N_rods = 41448                  # -, number of fuel rods
+D_fuel_pellet = 0.3225*cs.inch  # m, fuel pellet diameter
+D_fuel_road = 0.374*cs.inch     # m, fuel road outer diameter
+t_gap = 0.0065*cs.inch          # m, gap between fuel and cladding
+t_cladding = 0.0225*cs.inch     # m, cladding thickness
 
-# HX1
-Dout_HX1 = 19.05e-3         # m
-thick_HX1 = 1.24e-3         # m
-Ntubes_HX1 = 897            # -, tubes in the heat exchanger
-pitch_HX1 = 28.5e-3         # m
-Din_shell_HX1 = 1.5         # m
-Nbaffles_HX1 = 2            # -
-lbaffles_HX1 = 1.6          # m
-Ltubes_HX1 = 9.314          # m
-k_HX1 = 15                  # W m-1 K-1
-Aheader_HX1 = 0.883         # m2
-Atransfer_HX1 = 500         # m2
-epsilon_rel_HX1 = 1e-4      # -, epsilon/D
-FT_HX1 = 0.7                # -, correction factor for MLDT
+# Coolant flow
+mass_flow_coolant = 106.8*cs.lb/3600    # kg/s, effective mass flow rate in the core
+A_flow_coolant = 41.8*cs.foot**2        # m^2, effective flow area
+p_coolant = 2250*cs.psi         # Pa, coolant pressure
+T_in_coolant = cs.convert_temperature(535.0, 'F', 'C')  # °C, inlet coolant temperature
+pitch = 0.496*cs.inch           # m, core pitch
 
-# ISC
-p_ISC = 70e5                # Pa
-Dout_ISC = 16               # in, schedule 100
-L_H_ISC = 20                # m
-L_C_ISC = 20                # m
-epsilon_rel_ISC = 2e-4      # -, epsilon/D
-k_loss_ISC = 0.45           # -
-H_ISC = 10                  # m
-N_bends_ISC = 2             # the same number for heat and cold legs
-
-# HX2
-Dout_HX2 = 25.4e-3          # m
-thick_HX2 = 1.24e-3         # m
-Ntubes_HX2 = 770            # -, tubes in the heat exchanger
-Ltubes_HX2 = 7              # m
-Dmanifold_HX2 = 16          # in
-k_HX2 = 15                  # W m-1 K-1
-Atransfer_HX2 = 430         # m2
-epsilon_rel_HX2 = 1e-4      # -, epsilon/D
+# Numerics
+n_points = 11

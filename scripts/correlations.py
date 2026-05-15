@@ -1,5 +1,14 @@
 from pyfluids import Fluid
 import numpy as np
+from scipy.special import j0
+
+# =========================================================
+# Volumetric heat generation rate
+# def qvol(r: float, re: float, z: float, he: float) -> float:
+    
+
+# =========================================================
+
 
 # Fluid properties function
 def properties(fluid: Fluid) -> tuple[float,float,float]:
